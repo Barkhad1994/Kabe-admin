@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kabe Admin Upload</title>
+</head>
+<body>
+  <h1>Kabe Admin Upload</h1>
+  <input type="email" id="email" placeholder="Admin Email" /><br/>
+  <input type="password" id="password" placeholder="Password" /><br/>
+  <button onclick="loginAdmin()">Login</button>
+
+  <div id="upload-section" style="display:none;">
+    <h2>Upload Lesson</h2>
+    <input type="text" id="lesson-title" placeholder="Lesson Title" /><br/>
+    <input type="file" id="lesson-video" accept="video/*" /><br/>
+    <input type="file" id="lesson-pdf" accept="application/pdf" /><br/>
+    <button onclick="uploadLesson()">Upload</button>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9Z3ipE3_yKuKusDZXCrfzS2nCe-HjLjg",
+      authDomain: "barte-application.firebaseapp.com",
+      projectId: "barte-application",
+      storageBucket: "barte-application.appspot.com",
+      messagingSenderId: "122410972665",
+      appId: "1:122410972665:web:743bbbbcd4b73c3c6b7928",
+      measurementId: "G-ZP8JTQCREP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+  </script>
+
+  <!-- App Logic -->
+  <script>
+    function loginAdmin() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          document.getElementById('upload-section').style.display = 'block';
+        })
+        .catch(error => alert('Login failed: ' + error.message));
+    }
+
+    function uploadLesson() {
+      const title = document.getElementById('lesson-title').value;
+      const videoFile = document.getElementById('lesson-video').files[0];
+      const pdfFile = document.getElementById('lesson-pdf').files[0];
+      if (!title || !videoFile || !pdfFile) {
+        alert('Please fill all fields');
+        return;
+      }
+      const videoRef = storage.ref('lessons/videos/' + videoFile.name);
+      const pdfRef = storage.ref('lessons/pdfs/' + pdfFile.name);
+      Promise.all([videoRef.put(videoFile), pdfRef.put(pdfFile)]).then(() => {
+        alert('Lesson uploaded successfully');
+      }).catch(error => alert('Upload failed: ' + error.message));
+    }
+  </script>
+</body>
+</html>
